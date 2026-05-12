@@ -11,26 +11,25 @@ import java.util.Date;
 
 public class JwtUtil {
 
-    // Must be at least 32 characters (256 bits) for HS256
     private static final String SECRET_KEY = 
         "myEcommerceSecretKeyThatIsLongEnoughForHS256!!";
 
     private static final Key SIGNING_KEY =
         Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-    // Generate JWT token
+    //generate JWT token
     public static String generateToken(int id, String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id", id)
                 .claim("role", role)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(SIGNING_KEY, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // Validate token
+    //validate token
     public static boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()

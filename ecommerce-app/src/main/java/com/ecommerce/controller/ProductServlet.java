@@ -13,45 +13,56 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/products/add", "/products/delete", "/products/detail"})
+@WebServlet(urlPatterns = { "/products/add", "/products/delete", "/products/detail" })
 public class ProductServlet extends HttpServlet {
 
-    //logger instance
-    private static final Logger  logger         = LoggerFactory.getLogger(ProductServlet.class);
+    // logger instance
+    private static final Logger logger = LoggerFactory.getLogger(ProductServlet.class);
 
-    //product and review services
+    // product and review services
     private final ProductService productService = new ProductService();
-    private final ReviewService  reviewService  = new ReviewService();
+    private final ReviewService reviewService = new ReviewService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        //get current path
+        // get current path
         String path = req.getServletPath();
 
         if ("/products/add".equals(path)) {
-            //admin role restriction on adding product
+            // admin role restriction on adding product
             if (!isAdmin(req)) {
-                //redirect to home page not allowed to access add product if you are not admin
+                // redirect to home page not allowed to access add product if you are not admin
                 resp.sendRedirect(req.getContextPath() + "/home");
                 return;
             }
-            //else redirect to add product page
+            // else redirect to add product page
             req.getRequestDispatcher("/WEB-INF/views/addProduct.jsp").forward(req, resp);
 
         } else if ("/products/detail".equals(path)) {
             // show product details page
             String idParam = req.getParameter("id");
+            if (idParam == null || idParam.isBlank()) {
+                resp.sendRedirect(req.getContextPath() + "/home");
+                return;
+            }
+            // get product id
+            int productId = Integer.parseInt(idParam);
 
-            //get product id
-            int     productId = Integer.parseInt(idParam);
-            Product product   = productService.getProductById(productId);
+            try {
+                productId = Integer.parseInt(idParam);
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid product id: {}", idParam);
+                resp.sendRedirect(req.getContextPath() + "/home");
+                return;
+            }
+            Product product = productService.getProductById(productId);
 
-            //send product data and reviews
+            // send product data and reviews
             req.setAttribute("product", product);
             req.setAttribute("reviews", reviewService.getReviewsByProduct(productId));
 
-            //redirect to product details page
+            // redirect to product details page
             req.getRequestDispatcher("/WEB-INF/views/productDetail.jsp").forward(req, resp);
         }
     }
@@ -71,32 +82,32 @@ public class ProductServlet extends HttpServlet {
 
     private void handleAddProduct(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
-        //validate admin
+        // validate admin
         if (!isAdmin(req)) {
             resp.sendRedirect(req.getContextPath() + "/home");
             return;
         }
-        //get parameters
-        String name        = req.getParameter("name");
+        // get parameters
+        String name = req.getParameter("name");
         String description = req.getParameter("description");
-        String price       = req.getParameter("price");
-        String stock       = req.getParameter("stock");
-        int    createdBy   = (int) req.getSession().getAttribute("userId");
+        String price = req.getParameter("price");
+        String stock = req.getParameter("stock");
+        int createdBy = (int) req.getSession().getAttribute("userId");
 
-        //input validation
+        // input validation
         if (name == null || name.isBlank() ||
-            price == null || price.isBlank() ||
-            stock == null || stock.isBlank()) {
+                price == null || price.isBlank() ||
+                stock == null || stock.isBlank()) {
             req.setAttribute("error", "Name, price and stock are required.");
             req.getRequestDispatcher("/WEB-INF/views/addProduct.jsp").forward(req, resp);
             return;
         }
-        //sucess state test
+        // sucess state test
         boolean success = productService.addProduct(name, description, price, stock, createdBy);
 
         if (success) {
             logger.info("Product added by admin");
-            //redirect to home with new product
+            // redirect to home with new product
             resp.sendRedirect(req.getContextPath() + "/home?added=true");
         } else {
             req.setAttribute("error", "Failed to add product. Check price and stock values.");
@@ -106,26 +117,28 @@ public class ProductServlet extends HttpServlet {
 
     private void handleDeleteProduct(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        //validate admin
+        // validate admin
         if (!isAdmin(req)) {
             resp.sendRedirect(req.getContextPath() + "/home");
             return;
         }
-        //get id parameter
+        // get id parameter
         String idParam = req.getParameter("id");
-       
-        //get request parameters
-        int     productId = Integer.parseInt(idParam);
-        boolean success   = productService.deleteProduct(productId);
+
+        // get request parameters
+        int productId = Integer.parseInt(idParam);
+        boolean success = productService.deleteProduct(productId);
 
         logger.info("Product deleted", productId, success);
-        //redirect to home
+        // redirect to home
         resp.sendRedirect(req.getContextPath() + "/home");
     }
-    //validate admin
+
+    // validate admin
     private boolean isAdmin(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
-        if (session == null) return false;
+        if (session == null)
+            return false;
         String role = (String) session.getAttribute("role");
         return "ADMIN".equals(role);
     }

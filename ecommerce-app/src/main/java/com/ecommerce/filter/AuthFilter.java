@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
+//logger package
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +18,7 @@ import java.io.IOException;
     "/reviews/add"
 })
 public class AuthFilter implements Filter {
-
+    //logger instance
     private static final Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
     @Override
@@ -27,35 +28,34 @@ public class AuthFilter implements Filter {
         HttpServletRequest  req  = (HttpServletRequest)  request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
-        // ── 1. Check session first (stateful) ──────────────────────────────
+        //session validation
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("userId") != null) {
+            //session exist for user
             logger.info("AuthFilter: session valid for {}",
                         session.getAttribute("username"));
+            //ok user validated
             chain.doFilter(request, response);
             return;
         }
 
-        // ── 2. Fall back to JWT in Authorization header (stateless) ────────
+        //if user not logged in with browser and used client api (postman) 
+        //validate using bearer token
         String authHeader = req.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-
+            //if valid token then extract user data
             if (JwtUtil.validateToken(token)) {
-                Claims claims = JwtUtil.extractClaims(token);
-                // Inject user info into request so servlets can read it
                 req.setAttribute("userId",   JwtUtil.extractUserId(token));
                 req.setAttribute("username", JwtUtil.extractUsername(token));
                 req.setAttribute("role",     JwtUtil.extractRole(token));
-                logger.info("AuthFilter: JWT valid for {}", JwtUtil.extractUsername(token));
+                logger.info("JWT valid", JwtUtil.extractUsername(token));
                 chain.doFilter(request, response);
                 return;
             }
         }
-
-        // ── 3. Not authenticated — redirect to login ───────────────────────
-        logger.warn("AuthFilter: unauthorized access attempt to {}",
-                    req.getRequestURI());
+        //if no access
+        logger.warn("unauthorized access");
         resp.sendRedirect(req.getContextPath() + "/login");
     }
 }

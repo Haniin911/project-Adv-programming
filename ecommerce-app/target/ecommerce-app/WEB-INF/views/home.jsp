@@ -13,6 +13,16 @@
         <div class="alert alert-success">✅ Product added successfully!</div>
     <% } %>
 
+    <%-- ✅ رسالة لو مش logged in --%>
+    <% if (!loggedIn) { %>
+        <div class="alert alert-error" style="background:#fff3cd; color:#856404; border:1px solid #ffc107;">
+            👋 Welcome! Please <a href="${pageContext.request.contextPath}/login" 
+            style="color:#2980b9; font-weight:bold;">Login</a> 
+            or <a href="${pageContext.request.contextPath}/register" 
+            style="color:#27ae60; font-weight:bold;">Register</a> to access all features.
+        </div>
+    <% } %>
+
     <%-- Logged-in user info card --%>
     <% User user = (User) request.getAttribute("user"); %>
     <% if (loggedIn && user != null) { %>
@@ -32,6 +42,9 @@
 
     <%
         List<Product> products = (List<Product>) request.getAttribute("products");
+        boolean adminCheck = loggedIn && "ADMIN".equals(
+            request.getSession(false).getAttribute("role")
+        );
         if (products == null || products.isEmpty()) {
     %>
         <div class="card"><p>No products available yet.</p></div>
@@ -53,7 +66,7 @@
             <div>
                 <a href="${pageContext.request.contextPath}/products/detail?id=<%= p.getId() %>"
                    class="btn btn-primary">View</a>
-                <% if (isAdmin) { %>
+                <% if (adminCheck) { %>
                     <form action="${pageContext.request.contextPath}/products/delete"
                           method="post" style="display:inline"
                           onsubmit="return confirm('Delete this product?');">

@@ -22,9 +22,9 @@ public class RedisConnection {
             config.setMaxTotal(10);
             config.setMaxIdle(5);
             pool = new JedisPool(config, HOST, PORT, 2000, PASSWORD);
-            logger.info("Redis connection pool initialized");
+            logger.info("redis connection pool initialized");
         } catch (Exception e) {
-            logger.error("Failed to initialize Redis pool", e);
+            logger.error("failed to initialize Redis pool", e);
         }
     }
 

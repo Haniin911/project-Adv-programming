@@ -19,8 +19,8 @@ import java.io.IOException;
 public class RateLimitFilter implements Filter {
 
     private static final Logger logger      = LoggerFactory.getLogger(RateLimitFilter.class);
-    private static final int    MAX_REQUEST = 10;  // max requests allowed
-    private static final int    WINDOW_SEC  = 60;  // per 60 seconds
+    private static final int    MAX_REQUEST = 10; 
+    private static final int    WINDOW_SEC  = 60; 
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
@@ -29,7 +29,7 @@ public class RateLimitFilter implements Filter {
         HttpServletRequest  req  = (HttpServletRequest)  request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
-        // Use client IP as the key
+        // use client ip as key
         String ip      = req.getRemoteAddr();
         String uri     = req.getRequestURI();
         String redisKey = "rate:" + ip + ":" + uri;
@@ -40,7 +40,7 @@ public class RateLimitFilter implements Filter {
             int    count    = (countStr == null) ? 0 : Integer.parseInt(countStr);
 
             if (count >= MAX_REQUEST) {
-                // Too many requests
+                //too many requests
                 logger.warn("Rate limit exceeded for IP: {} on {}", ip, uri);
                 resp.setStatus(429);
                 resp.setContentType("application/json");
@@ -50,16 +50,16 @@ public class RateLimitFilter implements Filter {
                 return;
             }
 
-            // Increment counter
+            //increment counter
             jedis.incr(redisKey);
 
-            // Set expiry only on first request
+            //set expiry only on first request
             if (count == 0) {
                 jedis.expire(redisKey, WINDOW_SEC);
             }
 
         } catch (Exception e) {
-            // If Redis is down, don't block the request
+            //if Redis is down don't block the request
             logger.error("RateLimitFilter Redis error: {}", e.getMessage());
         }
 
