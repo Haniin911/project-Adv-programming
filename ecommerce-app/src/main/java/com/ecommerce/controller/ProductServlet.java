@@ -6,6 +6,8 @@ import com.ecommerce.service.ReviewService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
+//logger package
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,41 +16,42 @@ import java.io.IOException;
 @WebServlet(urlPatterns = {"/products/add", "/products/delete", "/products/detail"})
 public class ProductServlet extends HttpServlet {
 
+    //logger instance
     private static final Logger  logger         = LoggerFactory.getLogger(ProductServlet.class);
+
+    //product and review services
     private final ProductService productService = new ProductService();
     private final ReviewService  reviewService  = new ReviewService();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
+        //get current path
         String path = req.getServletPath();
 
         if ("/products/add".equals(path)) {
-            // Only admin can see the add product page
+            //admin role restriction on adding product
             if (!isAdmin(req)) {
+                //redirect to home page not allowed to access add product if you are not admin
                 resp.sendRedirect(req.getContextPath() + "/home");
                 return;
             }
+            //else redirect to add product page
             req.getRequestDispatcher("/WEB-INF/views/addProduct.jsp").forward(req, resp);
 
         } else if ("/products/detail".equals(path)) {
-            // Show product details page
+            // show product details page
             String idParam = req.getParameter("id");
-            if (idParam == null) {
-                resp.sendRedirect(req.getContextPath() + "/home");
-                return;
-            }
+
+            //get product id
             int     productId = Integer.parseInt(idParam);
             Product product   = productService.getProductById(productId);
 
-            if (product == null) {
-                resp.sendRedirect(req.getContextPath() + "/home");
-                return;
-            }
-
+            //send product data and reviews
             req.setAttribute("product", product);
             req.setAttribute("reviews", reviewService.getReviewsByProduct(productId));
+
+            //redirect to product details page
             req.getRequestDispatcher("/WEB-INF/views/productDetail.jsp").forward(req, resp);
         }
     }
@@ -68,19 +71,19 @@ public class ProductServlet extends HttpServlet {
 
     private void handleAddProduct(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
-
+        //validate admin
         if (!isAdmin(req)) {
             resp.sendRedirect(req.getContextPath() + "/home");
             return;
         }
-
+        //get parameters
         String name        = req.getParameter("name");
         String description = req.getParameter("description");
         String price       = req.getParameter("price");
         String stock       = req.getParameter("stock");
         int    createdBy   = (int) req.getSession().getAttribute("userId");
 
-        // Input validation
+        //input validation
         if (name == null || name.isBlank() ||
             price == null || price.isBlank() ||
             stock == null || stock.isBlank()) {
@@ -88,11 +91,12 @@ public class ProductServlet extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/views/addProduct.jsp").forward(req, resp);
             return;
         }
-
+        //sucess state test
         boolean success = productService.addProduct(name, description, price, stock, createdBy);
 
         if (success) {
-            logger.info("Product added by admin userId: {}", createdBy);
+            logger.info("Product added by admin");
+            //redirect to home with new product
             resp.sendRedirect(req.getContextPath() + "/home?added=true");
         } else {
             req.setAttribute("error", "Failed to add product. Check price and stock values.");
@@ -102,26 +106,23 @@ public class ProductServlet extends HttpServlet {
 
     private void handleDeleteProduct(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-
+        //validate admin
         if (!isAdmin(req)) {
             resp.sendRedirect(req.getContextPath() + "/home");
             return;
         }
-
+        //get id parameter
         String idParam = req.getParameter("id");
-        if (idParam == null) {
-            resp.sendRedirect(req.getContextPath() + "/home");
-            return;
-        }
-
+       
+        //get request parameters
         int     productId = Integer.parseInt(idParam);
         boolean success   = productService.deleteProduct(productId);
 
-        logger.info("Product delete attempt id={} success={}", productId, success);
+        logger.info("Product deleted", productId, success);
+        //redirect to home
         resp.sendRedirect(req.getContextPath() + "/home");
     }
-
-    // Helper — checks if logged-in user is ADMIN
+    //validate admin
     private boolean isAdmin(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         if (session == null) return false;

@@ -18,7 +18,10 @@ import java.util.List;
 @WebServlet("/home")
 public class HomeServlet extends HttpServlet {
 
+    //logger instance
     private static final Logger logger = LoggerFactory.getLogger(HomeServlet.class);
+
+    //3 instances of our services
     private final ProductService productService = new ProductService();
     private final ReviewService reviewService = new ReviewService();
     private final UserService userService = new UserService();
@@ -28,7 +31,7 @@ public class HomeServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            // Get logged-in user from session
+            //get the current user from the session
             HttpSession session = req.getSession(false);
             if (session != null && session.getAttribute("userId") != null) {
                 int userId = (Integer) session.getAttribute("userId");
@@ -36,21 +39,22 @@ public class HomeServlet extends HttpServlet {
                 req.setAttribute("user", user);
             }
 
-            // Load products and reviews
+            //get all products and reviews
             List<Product> products = productService.getAllProducts();
             List<Review> reviews = reviewService.getAllReviews();
 
+            //set request attributes
             req.setAttribute("products", products);
             req.setAttribute("reviews", reviews);
 
-            logger.info("Home page loaded with {} products", products.size());
+            //logger info success
+            logger.info("Home page loaded with products");
 
         } catch (Exception e) {
             logger.error("Failed to load home page data", e);
             req.setAttribute("error", "Could not load products. Please try again.");
         }
-
-        // forward() must ALWAYS be the last line — after try/catch
+        //redirect to home page
         req.getRequestDispatcher("/WEB-INF/views/home.jsp").forward(req, resp);
     }
 }
