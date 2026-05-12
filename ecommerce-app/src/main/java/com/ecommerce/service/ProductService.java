@@ -1,106 +1,128 @@
-package com.ecommerce.service;
 
+package com.ecommerce.service;
+//get product dao
 import com.ecommerce.dao.ProductDAO;
+
+//import product model
 import com.ecommerce.model.Product;
+
+//get redis connection end point
 import com.ecommerce.util.RedisConnection;
 import com.fasterxml.jackson.core.type.TypeReference;
+
+//redis only store text but this convert it into objects
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+//get logger package
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class ProductService {
-
+    //logger instance
     private static final Logger logger       = LoggerFactory.getLogger(ProductService.class);
-    private static final String CACHE_KEY    = "all_products";
-    private static final int    CACHE_EXPIRY = 300; 
 
+    //name of redis key
+    private static final String CACHE_KEY    = "all_products";
+    //expiration key of redis retrival
+    private static final int    CACHE_EXPIRY = 300; 
+    
+
+    //product dao
     private final ProductDAO   productDAO   = new ProductDAO();
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // Get all products — checks Redis cache first
+    //get all products
     public List<Product> getAllProducts() {
 
-        // 1. Try to get from Redis cache
+        // use redis to return all products
         try (Jedis jedis = RedisConnection.getJedis()) {
+            //use of cache key
             String cached = jedis.get(CACHE_KEY);
+
+            //first explore redis
             if (cached != null) {
-                logger.info("Cache HIT — returning products from Redis");
+                logger.info("Cache HIT");
                 return objectMapper.readValue(cached,
                         new TypeReference<List<Product>>() {});
             }
         } catch (Exception e) {
-            logger.warn("Redis cache read failed, falling back to DB: {}", e.getMessage());
+            logger.warn("Redis cache read failed", e.getMessage());
         }
 
-        // 2. Cache miss — fetch from database
-        logger.info("Cache MISS — fetching products from MySQL");
+        //logger info to inform about redis explore nullity and use database
+        logger.info("fetching products from MySQL");
+
+        //empty list to put products in
+        //use dao
         List<Product> products = productDAO.getAllProducts();
 
-        // 3. Store result in Redis for next time
+        //put fteched products in redis 
         try (Jedis jedis = RedisConnection.getJedis()) {
             String json = objectMapper.writeValueAsString(products);
             jedis.setex(CACHE_KEY, CACHE_EXPIRY, json);
             logger.info("Products cached in Redis");
         } catch (Exception e) {
-            logger.warn("Redis cache write failed: {}", e.getMessage());
+            //logger warning of exception
+            logger.warn("Redis cache write", e.getMessage());
         }
 
         return products;
     }
 
-    // Get a single product by ID
+    //get product by id
     public Product getProductById(int id) {
         return productDAO.getProductById(id);
     }
 
-    // Add a new product (admin only — enforced in servlet)
+    // add new product
     public boolean addProduct(String name, String description,
                               String price, String stock, int createdBy) {
         try {
-            BigDecimal productPrice = new BigDecimal(price);
+            //numeric conversion
+            double productPrice = Double.parseDouble(price);
             int productStock        = Integer.parseInt(stock);
 
             Product product = new Product(name, description,
                                           productPrice, productStock, createdBy);
-
+            //product dao
             boolean success = productDAO.addProduct(product);
 
-            // Invalidate cache so new product appears immediately
+            //delete cache if new product added
             if (success) {
-                invalidateCache();
+                emptyCache();
             }
 
             return success;
 
         } catch (NumberFormatException e) {
-            logger.error("Invalid price or stock value: {}", e.getMessage());
+            logger.error("Invalid product", e.getMessage());
             return false;
         }
     }
 
-    // Delete a product (admin only — enforced in servlet)
+    // delete product
     public boolean deleteProduct(int id) {
         boolean success = productDAO.deleteProduct(id);
 
-        // Invalidate cache
+        //delete cache
         if (success) {
-            invalidateCache();
+            emptyCache();
         }
 
         return success;
     }
 
-    // Clear the Redis product cache
-    private void invalidateCache() {
+    // clear the Redis product cache
+    private void emptyCache() {
         try (Jedis jedis = RedisConnection.getJedis()) {
             jedis.del(CACHE_KEY);
-            logger.info("Product cache invalidated");
+            logger.info("Product cache empty");
         } catch (Exception e) {
-            logger.warn("Failed to invalidate cache: {}", e.getMessage());
+            logger.warn("Failed to empty cache", e.getMessage());
         }
     }
 }

@@ -1,22 +1,24 @@
 package com.ecommerce.model;
 
-import java.math.BigDecimal;
+//for the created at column
 import java.sql.Timestamp;
 
 public class Product {
-
+    // the column names we created in the database code 
     private int id;
     private String name;
     private String description;
-    private BigDecimal price;
+    private double price;
     private int stock;
     private int createdBy;     
     private Timestamp createdAt;
 
-   
+   //first build an empty object then but the data in it
     public Product() {}
 
-    public Product(String name, String description, BigDecimal price, int stock, int createdBy) {
+    //assign data using the argumented constructor
+    //created by already set to only the admin (oonnnnlllyyy)
+    public Product(String name, String description, double price, int stock, int createdBy) {
         this.name        = name;
         this.description = description;
         this.price       = price;
@@ -24,7 +26,7 @@ public class Product {
         this.createdBy   = createdBy;
     }
 
-   
+    //getters and setters
     public int getId()                      { return id; }
     public void setId(int id)               { this.id = id; }
 
@@ -34,8 +36,8 @@ public class Product {
     public String getDescription()          { return description; }
     public void setDescription(String d)    { this.description = d; }
 
-    public BigDecimal getPrice()            { return price; }
-    public void setPrice(BigDecimal p)      { this.price = p; }
+    public double getPrice()            { return price; }
+    public void setPrice(double p)      { this.price = p; }
 
     public int getStock()                   { return stock; }
     public void setStock(int s)             { this.stock = s; }
@@ -46,6 +48,8 @@ public class Product {
     public Timestamp getCreatedAt()         { return createdAt; }
     public void setCreatedAt(Timestamp t)   { this.createdAt = t; }
 
+
+    //return the data of the product clean with override toString method
     @Override
     public String toString() {
         return "Product{id=" + id + ", name=" + name + ", price=" + price + "}";

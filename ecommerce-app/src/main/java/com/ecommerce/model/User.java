@@ -1,9 +1,9 @@
 package com.ecommerce.model;
-
-import java.sql.Timestamp;
+//for the created at column
+import java.sql.Timestamp; 
 
 public class User {
-
+    // the column names we created in the database code 
     private int id;
     private String username;
     private String email;
@@ -11,8 +11,11 @@ public class User {
     private String role;      
     private Timestamp createdAt;
 
+    //first build an empty object then but the data in it
     public User() {}
 
+    //constructor of the user model class
+    //when we call User u = new User("haneen", "h@test.com", "123", "admin"); it assignes every value to it's column in the database
     public User(String username, String email, String password, String role) {
         this.username  = username;
         this.email     = email;
@@ -20,6 +23,7 @@ public class User {
         this.role      = role;
     }
 
+    //getters and setters of every private variable in the model
     public int getId()                      { return id; }
     public void setId(int id)               { this.id = id; }
 
@@ -38,6 +42,8 @@ public class User {
     public Timestamp getCreatedAt()         { return createdAt; }
     public void setCreatedAt(Timestamp t)   { this.createdAt = t; }
 
+    //returning user information as a string
+    // toString is already method in the object and we override it to change its behavior to return readable user data
     @Override
     public String toString() {
         return "User{id=" + id + ", username=" + username + ", role=" + role + "}";
