@@ -29,7 +29,7 @@
         <%-- Add Review Form — logged in NON-ADMIN users only --%>
         <% if (loggedIn && !isAdmin) { %>
             <div class="card">
-                <h3 style="margin-bottom:15px;">✍️ Write a Review</h3>
+                <h3 style="margin-bottom:15px;"> Write a Review</h3>
                 <form action="${pageContext.request.contextPath}/reviews/add" method="post">
                     <input type="hidden" name="productId" value="<%= product.getId() %>">
                     <div style="margin-bottom:15px;">
@@ -73,7 +73,7 @@
         %>
             <div class="card">
                 <p><strong><%= r.getUsername() %></strong>
-                   &nbsp;⭐ <%= r.getRating() %>/5</p>
+                   &nbsp;<%= r.getRating() %>/5</p>
                 <p style="margin-top:5px; color:#555;"><%= r.getComment() %></p>
                 <p style="font-size:0.8em; color:#aaa; margin-top:5px;"><%= r.getCreatedAt() %></p>
             </div>

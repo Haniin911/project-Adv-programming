@@ -6,7 +6,7 @@
         <h2 style="margin-bottom:20px; text-align:center;">📝 Register</h2>
 
         <% if (request.getAttribute("error") != null) { %>
-            <div class="alert alert-error">❌ <%= request.getAttribute("error") %></div>
+            <div class="alert alert-error"><%= request.getAttribute("error") %></div>
         <% } %>
 
         <form action="${pageContext.request.contextPath}/register" method="post">

@@ -87,27 +87,29 @@ public class ProductDAO {
             return false;
         }
     }
-
+    //delete product reviews before product
     public boolean deleteProduct(int id) {
+        //sql statements
         String deleteReviews = "DELETE FROM reviews WHERE product_id = ?";
         String deleteProduct = "DELETE FROM products WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection()) {
             try (PreparedStatement ps1 = conn.prepareStatement(deleteReviews)) {
                 ps1.setInt(1, id);
+                //excute
                 int reviewsDeleted = ps1.executeUpdate();
-                logger.info("Reviews deleted for product id {}: {}", id, reviewsDeleted);
+                logger.info("reviews deleted for product id {}: {}", id, reviewsDeleted);
             }
 
             try (PreparedStatement ps2 = conn.prepareStatement(deleteProduct)) {
                 ps2.setInt(1, id);
                 int rows = ps2.executeUpdate();
-                logger.info("Product deleted, id: {}, rows affected: {}", id, rows);
+                logger.info("product deleted id: {}, rows affected: {}", id, rows);
                 return rows > 0;
             }
 
         } catch (SQLException e) {
-            logger.error("Error deleting product: {}", e.getMessage());
+            logger.error("Error: {}", e.getMessage());
             return false;
         }
     }

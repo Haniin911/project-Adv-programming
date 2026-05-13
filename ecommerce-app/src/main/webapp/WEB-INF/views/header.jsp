@@ -60,7 +60,7 @@
             <% if (isAdmin) { %>
                 <a href="${pageContext.request.contextPath}/products/add">Add Product</a>
             <% } %>
-            <span style="margin-left:15px; color:#ccc;">👤 <%= navUsername %></span>
+            <span style="margin-left:15px; color:#ccc;"> <%= navUsername %></span>
             <a href="${pageContext.request.contextPath}/logout">Logout</a>
         <% } else { %>
             <a href="${pageContext.request.contextPath}/login">Login</a>

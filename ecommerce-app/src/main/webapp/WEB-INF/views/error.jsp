@@ -3,7 +3,6 @@
 
 <div class="container" style="text-align:center; margin-top:80px;">
     <div class="card">
-        <h1 style="font-size:4em; color:#e74c3c;">⚠️</h1>
         <h2 style="margin:20px 0;">Something went wrong</h2>
         <% Integer code = (Integer) request.getAttribute("jakarta.servlet.error.status_code"); %>
         <% if (code != null && code == 404) { %>

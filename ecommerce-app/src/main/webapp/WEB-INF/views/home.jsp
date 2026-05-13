@@ -10,13 +10,13 @@
 
     <%-- Success / error messages --%>
     <% if ("true".equals(request.getParameter("added"))) { %>
-        <div class="alert alert-success">✅ Product added successfully!</div>
+        <div class="alert alert-success">Product added successfully!</div>
     <% } %>
 
-    <%-- ✅ رسالة لو مش logged in --%>
+
     <% if (!loggedIn) { %>
         <div class="alert alert-error" style="background:#fff3cd; color:#856404; border:1px solid #ffc107;">
-            👋 Welcome! Please <a href="${pageContext.request.contextPath}/login" 
+            Welcome! Please <a href="${pageContext.request.contextPath}/login" 
             style="color:#2980b9; font-weight:bold;">Login</a> 
             or <a href="${pageContext.request.contextPath}/register" 
             style="color:#27ae60; font-weight:bold;">Register</a> to access all features.
@@ -27,7 +27,7 @@
     <% User user = (User) request.getAttribute("user"); %>
     <% if (loggedIn && user != null) { %>
         <div class="card" style="background:#eaf4fb;">
-            <h3>👋 Welcome back, <%= user.getUsername() %>!</h3>
+            <h3>Welcome back, <%= user.getUsername() %>!</h3>
             <p>Email: <%= user.getEmail() %> &nbsp;|&nbsp; Role: <%= user.getRole() %></p>
             <form action="${pageContext.request.contextPath}/account/delete"
                   method="post" style="margin-top:10px"
@@ -38,7 +38,7 @@
     <% } %>
 
     <%-- Products Section --%>
-    <h2 style="margin-bottom:20px;">🛍️ Products</h2>
+    <h2 style="margin-bottom:20px;">Products</h2>
 
     <%
         List<Product> products = (List<Product>) request.getAttribute("products");
@@ -82,7 +82,7 @@
     %>
 
     <%-- Reviews Section --%>
-    <h2 style="margin:30px 0 20px;">💬 Recent Reviews</h2>
+    <h2 style="margin:30px 0 20px;">Recent Reviews</h2>
     <%
         List<Review> reviews = (List<Review>) request.getAttribute("reviews");
         if (reviews == null || reviews.isEmpty()) {
@@ -94,7 +94,7 @@
     %>
         <div class="card">
             <p><strong><%= r.getUsername() %></strong>
-               &nbsp;⭐ <%= r.getRating() %>/5</p>
+               &nbsp;<%= r.getRating() %>/5</p>
             <p style="margin-top:5px; color:#555;"><%= r.getComment() %></p>
             <p style="font-size:0.8em; color:#aaa; margin-top:5px;"><%= r.getCreatedAt() %></p>
         </div>

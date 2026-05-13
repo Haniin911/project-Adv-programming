@@ -78,8 +78,9 @@ public class ProductService {
     public Product getProductById(int id) {
         return productDAO.getProductById(id);
     }
-
+    //delete product
     public boolean deleteProduct(int id) {
+        //first empty cache
         emptyCache();
 
         boolean success = productDAO.deleteProduct(id);
@@ -90,7 +91,7 @@ public class ProductService {
 
         return success;
     }
-
+    //add new product
     public boolean addProduct(String name, String description,
             String price, String stock, int createdBy) {
         try {

@@ -6,7 +6,7 @@
         <h2 style="margin-bottom:20px; text-align:center;">🔐 Login</h2>
 
         <% if ("true".equals(request.getParameter("registered"))) { %>
-            <div class="alert alert-success">✅ Registered! Please log in.</div>
+            <div class="alert alert-success">Registered! Please log in.</div>
         <% } %>
         <% if ("true".equals(request.getParameter("deleted"))) { %>
             <div class="alert alert-success">Account deleted successfully.</div>

@@ -1,7 +1,6 @@
 package com.ecommerce.filter;
 
 import com.ecommerce.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
